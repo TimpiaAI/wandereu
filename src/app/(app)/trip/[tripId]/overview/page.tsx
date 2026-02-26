@@ -40,29 +40,29 @@ export default function OverviewPage() {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<unknown>(null);
-  const [mapError, setMapError] = useState(false);
   const [startingTrip, setStartingTrip] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // ── Init Mapbox ────────────────────────────────────────────────────────
+  // ── Init Leaflet ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!trip || !activities || mapInstanceRef.current || !mapRef.current) {
       return;
     }
 
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) {
-      setMapError(true);
-      return;
-    }
-
-    let map: unknown = null;
+    let map: { remove: () => void } | null = null;
 
     async function initMap() {
       try {
-        const mapboxgl = (await import("mapbox-gl")).default;
+        const L = (await import("leaflet")).default;
 
-        (mapboxgl as { accessToken: string }).accessToken = token!;
+        // Fix Leaflet default marker icons (CSS/webpack issue)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+          iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+          shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+        });
 
         type ActWithLocation = { location?: { lat?: number; lng?: number }; title: string };
         const allLocations = (activities as ActWithLocation[] ?? [])
@@ -73,65 +73,50 @@ export default function OverviewPage() {
             title: a.title,
           }));
 
-        const centerLng = trip!.destination.lng;
         const centerLat = trip!.destination.lat;
+        const centerLng = trip!.destination.lng;
 
-        type MapboxMap = {
-          on: (event: string, cb: () => void) => void;
-          remove: () => void;
-        };
-        type MapboxMarker = {
-          setLngLat: (coords: [number, number]) => MapboxMarker;
-          addTo: (map: MapboxMap) => MapboxMarker;
-        };
-        type MapboxPopup = {
-          setHTML: (html: string) => MapboxPopup;
-          offset?: number;
-        };
+        const mapInstance = L.map(mapRef.current!, {
+          scrollWheelZoom: false,
+        }).setView([centerLat, centerLng], allLocations.length > 0 ? 13 : 12);
 
-        const mapInstance = new (
-          mapboxgl as unknown as {
-            Map: new (opts: object) => MapboxMap;
-          }
-        ).Map({
-          container: mapRef.current!,
-          style: "mapbox://styles/mapbox/light-v11",
-          center: [centerLng, centerLat],
-          zoom: allLocations.length > 0 ? 11 : 12,
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          maxZoom: 19,
+        }).addTo(mapInstance);
+
+        // Custom accent marker
+        const accentIcon = L.divIcon({
+          className: "",
+          html: '<div style="width:12px;height:12px;border-radius:50%;background:#E8553A;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>',
+          iconSize: [12, 12],
+          iconAnchor: [6, 6],
         });
+
+        allLocations.forEach(({ lng, lat, title }) => {
+          L.marker([lat, lng], { icon: accentIcon })
+            .addTo(mapInstance)
+            .bindPopup(`<span style="font-size:12px;font-family:sans-serif">${title}</span>`);
+        });
+
+        // Fit bounds if we have locations
+        if (allLocations.length > 1) {
+          const bounds = L.latLngBounds(allLocations.map(({ lat, lng }) => [lat, lng]));
+          mapInstance.fitBounds(bounds, { padding: [40, 40] });
+        }
 
         mapInstanceRef.current = mapInstance;
         map = mapInstance;
-
-        mapInstance.on("load", () => {
-          allLocations.forEach(({ lng, lat, title }: { lng: number; lat: number; title: string }) => {
-            const el = document.createElement("div");
-            el.className =
-              "w-3 h-3 rounded-full bg-accent border-2 border-white shadow";
-
-            const popup = new (
-              mapboxgl as unknown as { Popup: new (opts: object) => MapboxPopup }
-            ).Popup({ offset: 16 }).setHTML(
-              `<span style="font-size:12px;font-family:sans-serif">${title}</span>`
-            );
-
-            new (
-              mapboxgl as unknown as { Marker: new (el: HTMLElement) => MapboxMarker }
-            ).Marker(el)
-              .setLngLat([lng, lat])
-              .addTo(mapInstance);
-          });
-        });
-      } catch {
-        setMapError(true);
+      } catch (err) {
+        console.error("Map init error:", err);
       }
     }
 
     initMap();
 
     return () => {
-      if (map && (map as { remove?: () => void }).remove) {
-        (map as { remove: () => void }).remove();
+      if (map) {
+        map.remove();
         mapInstanceRef.current = null;
       }
     };
@@ -195,6 +180,10 @@ export default function OverviewPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Leaflet CSS */}
+      {/* eslint-disable-next-line @next/next/no-css-tags */}
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
       {/* ── Hero Summary Card ───────────────────────────────── */}
       <div className="rounded-[8px] border border-border-subtle bg-bg-primary p-5 flex flex-col gap-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -277,24 +266,10 @@ export default function OverviewPage() {
           </span>
         </div>
 
-        {mapError ? (
-          <div className="h-[280px] md:h-[400px] bg-bg-secondary flex flex-col items-center justify-center gap-3 text-text-tertiary">
-            <MapPin size={32} className="opacity-40" />
-            <div className="text-center">
-              <p className="text-sm font-medium text-text-secondary">
-                Map preview
-              </p>
-              <p className="text-xs mt-0.5">
-                Add NEXT_PUBLIC_MAPBOX_TOKEN to enable maps
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div
-            ref={mapRef}
-            className="h-[280px] md:h-[400px] w-full bg-bg-secondary"
-          />
-        )}
+        <div
+          ref={mapRef}
+          className="h-[280px] md:h-[400px] w-full bg-bg-secondary"
+        />
       </div>
 
       {/* ── Budget Breakdown Pie ─────────────────────────────── */}
