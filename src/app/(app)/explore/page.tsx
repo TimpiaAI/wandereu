@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 const POPULAR_DESTINATIONS = [
   { city: "Paris", country: "France", from: 420 },
-  { city: "Barcelona", country: "Spain", from: 350 },
+  { city: "Madrid", country: "Spain", from: 350 },
   { city: "Amsterdam", country: "Netherlands", from: 380 },
   { city: "Prague", country: "Czech Republic", from: 280 },
   { city: "Lisbon", country: "Portugal", from: 310 },
@@ -31,7 +31,7 @@ const POPULAR_DESTINATIONS = [
 const BUDGET_PICKS = [
   { city: "Budapest", country: "Hungary", from: 250, rating: 4.8 },
   { city: "Prague", country: "Czech Republic", from: 280, rating: 4.7 },
-  { city: "Krakow", country: "Poland", from: 220, rating: 4.6 },
+  { city: "Warsaw", country: "Poland", from: 220, rating: 4.6 },
   { city: "Bucharest", country: "Romania", from: 180, rating: 4.4 },
   { city: "Sofia", country: "Bulgaria", from: 160, rating: 4.3 },
   { city: "Riga", country: "Latvia", from: 200, rating: 4.5 },
