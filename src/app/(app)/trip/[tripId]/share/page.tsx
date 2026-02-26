@@ -217,7 +217,7 @@ export default function SharePage() {
 
   function handleSendEmail(e: React.FormEvent) {
     e.preventDefault();
-    if (!emailInput.trim()) return;
+    if (!emailInput.trim() || !trip) return;
     // In a real app, call an API/mutation to send invite email
     // For now, open mailto
     const subject = encodeURIComponent(`Join my trip to ${trip.destination.city}`);
@@ -231,6 +231,7 @@ export default function SharePage() {
   }
 
   async function handleTogglePublic() {
+    if (!trip) return;
     setTogglingPublic(true);
     await updateTrip({ tripId, isPublic: !trip.isPublic });
     setTogglingPublic(false);

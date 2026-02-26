@@ -125,13 +125,22 @@ export default function OnboardingPage() {
 
   async function handleFinish() {
     setIsSubmitting(true);
+    const comfortMap: Record<string, "budget" | "mid-range" | "comfort"> = {
+      backpacker: "budget",
+      midrange: "mid-range",
+      comfortable: "comfort",
+    };
     try {
       await completeOnboarding({
-        city,
-        country,
-        travelStyle: travelStyle ?? "midrange",
-        interests: selectedInterests,
-        dietaryNeeds: dietaryNeeds.length === 0 ? ["None"] : dietaryNeeds,
+        isStudent: true,
+        homeCity: city,
+        homeCountry: country,
+        currency: "EUR",
+        travelPreferences: {
+          comfortLevel: comfortMap[travelStyle ?? "midrange"] ?? "budget",
+          interests: selectedInterests,
+          dietaryRestrictions: dietaryNeeds.filter((d) => d !== "None"),
+        },
       });
       router.push("/dashboard");
     } catch {

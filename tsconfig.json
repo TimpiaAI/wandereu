@@ -30,23 +30,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts",
-    "convex/_generated/**/*.ts"
+    "**/*.mts"
   ],
   "exclude": [
-    "node_modules",
-    "convex/activities.ts",
-    "convex/ai/**",
-    "convex/chatMessages.ts",
-    "convex/cronHandlers.ts",
-    "convex/crons.ts",
-    "convex/emails.ts",
-    "convex/expenses.ts",
-    "convex/schema.ts",
-    "convex/studentDiscounts.ts",
-    "convex/tripDays.ts",
-    "convex/tripMembers.ts",
-    "convex/trips.ts",
-    "convex/users.ts"
+    "node_modules"
   ]
 }
