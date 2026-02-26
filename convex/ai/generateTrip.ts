@@ -1,10 +1,12 @@
 import { v } from "convex/values";
-import { action, internalAction } from "convex/server";
+import { action, internalAction } from "../_generated/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { api, internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
 
-const client = new Anthropic();
+function getAnthropicClient() {
+  return new Anthropic();
+}
 
 const SYSTEM_PROMPT = `You are WanderEU's expert EU student travel planner. You create detailed, realistic, budget-conscious travel itineraries for university students travelling within Europe.
 
@@ -189,7 +191,7 @@ export const generateTripInternal = internalAction({
 
     let rawContent: string;
     try {
-      const message = await client.messages.create({
+      const message = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-20250514",
         max_tokens: 8192,
         system: SYSTEM_PROMPT,

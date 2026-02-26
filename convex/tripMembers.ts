@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "convex/server";
+import { mutation, query } from "./_generated/server";
 
 const roleValidator = v.union(
   v.literal("owner"),

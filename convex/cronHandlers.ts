@@ -1,12 +1,12 @@
-import { internalAction, internalMutation } from "convex/server";
+import { internalAction, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 // ─── Send Weekly Digest ───────────────────────────────────────────────────────
 export const sendWeeklyDigest = internalAction({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<{ processed: number; sent: number }> => {
     // Fetch all users who have opted into digest emails
-    const users = await ctx.runQuery(internal.cronHandlers.getUsersForDigest);
+    const users: any[] = await ctx.runQuery(internal.cronHandlers.getUsersForDigest);
 
     let sent = 0;
     for (const user of users) {
@@ -39,7 +39,7 @@ export const sendWeeklyDigest = internalAction({
 // ─── Send Trip Reminders ──────────────────────────────────────────────────────
 export const sendTripReminders = internalAction({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<{ sent: number }> => {
     const now = new Date();
     const today = now.toISOString().split("T")[0];
 
@@ -97,7 +97,7 @@ export const sendTripReminders = internalAction({
 // ─── Send Daily Itinerary ──────────────────────────────────────────────────────
 export const sendDailyItinerary = internalAction({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<{ sent: number; date: string }> => {
     const today = new Date().toISOString().split("T")[0];
 
     const activeTrips = await ctx.runQuery(
@@ -132,7 +132,7 @@ export const sendDailyItinerary = internalAction({
 // ─── Check Budget Alerts ───────────────────────────────────────────────────────
 export const checkBudgetAlerts = internalAction({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<{ sent: number }> => {
     const tripsOverThreshold = await ctx.runQuery(
       internal.cronHandlers.getTripsOverBudgetThreshold,
       { thresholdPercent: 80 }
@@ -182,7 +182,7 @@ export const checkBudgetAlerts = internalAction({
 // ─── Mark Completed Trips ─────────────────────────────────────────────────────
 export const markCompletedTrips = internalAction({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<{ marked: number }> => {
     const today = new Date().toISOString().split("T")[0];
 
     const expiredTrips = await ctx.runQuery(
@@ -205,7 +205,7 @@ export const markCompletedTrips = internalAction({
 });
 
 // ─── Internal Queries used by cron handlers ───────────────────────────────────
-import { internalQuery } from "convex/server";
+import { internalQuery } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 

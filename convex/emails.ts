@@ -1,10 +1,12 @@
 import { v } from "convex/values";
-import { internalAction } from "convex/server";
+import { internalAction } from "./_generated/server";
 import { Resend } from "resend";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 const FROM_EMAIL = "WanderEU <hello@wandereu.app>";
 
 // ─── Log Email ────────────────────────────────────────────────────────────────
@@ -71,7 +73,7 @@ export const sendWelcomeEmail = internalAction({
   },
   handler: async (ctx, args) => {
     try {
-      const { data, error } = await resend.emails.send({
+      const { data, error } = await getResend().emails.send({
         from: FROM_EMAIL,
         to: [args.email],
         subject: "Welcome to WanderEU — your EU adventure starts now",
@@ -117,7 +119,7 @@ export const sendTripSummary = internalAction({
   },
   handler: async (ctx, args) => {
     try {
-      const { data, error } = await resend.emails.send({
+      const { data, error } = await getResend().emails.send({
         from: FROM_EMAIL,
         to: [args.email],
         subject: `Your WanderEU trip to ${args.destination} is ready!`,
@@ -160,7 +162,7 @@ export const sendBudgetAlert = internalAction({
   },
   handler: async (ctx, args) => {
     try {
-      const { data, error } = await resend.emails.send({
+      const { data, error } = await getResend().emails.send({
         from: FROM_EMAIL,
         to: [args.email],
         subject: `Budget alert: You've used ${args.percentUsed}% of your ${args.tripTitle} budget`,
@@ -204,7 +206,7 @@ export const sendGroupInvite = internalAction({
   },
   handler: async (ctx, args) => {
     try {
-      const { data, error } = await resend.emails.send({
+      const { data, error } = await getResend().emails.send({
         from: FROM_EMAIL,
         to: [args.recipientEmail],
         subject: `${args.inviterName} invited you to a WanderEU trip to ${args.destination}`,
@@ -247,7 +249,7 @@ export const sendTripReminder = internalAction({
   },
   handler: async (ctx, args) => {
     try {
-      const { data, error } = await resend.emails.send({
+      const { data, error } = await getResend().emails.send({
         from: FROM_EMAIL,
         to: [args.email],
         subject: `Your trip to ${args.destination} is in ${args.daysUntilTrip} days!`,
@@ -279,7 +281,7 @@ export const sendTripReminder = internalAction({
 // ─── Internal Mutation for email logging ──────────────────────────────────────
 // This lives here but is called via internal.emails.insertEmailLogMutation
 // In the Convex model, actions cannot write to DB directly; they use mutations.
-import { internalMutation } from "convex/server";
+import { internalMutation } from "./_generated/server";
 
 export const insertEmailLogMutation = internalMutation({
   args: {

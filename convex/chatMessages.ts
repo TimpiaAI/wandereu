@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query, internalMutation } from "convex/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 
 // ─── Create Message ───────────────────────────────────────────────────────────
 export const create = mutation({

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query, internalMutation } from "convex/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 
 const activityTypeValidator = v.union(
   v.literal("transport"),

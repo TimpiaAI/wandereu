@@ -1,9 +1,11 @@
 import { v } from "convex/values";
-import { action } from "convex/server";
+import { action } from "../_generated/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { api, internal } from "../_generated/api";
 
-const client = new Anthropic();
+function getAnthropicClient() {
+  return new Anthropic();
+}
 
 const CHAT_SYSTEM_PROMPT = `You are Wanda, WanderEU's friendly AI travel assistant for EU student trips. You have deep knowledge of European travel on a student budget.
 
@@ -128,7 +130,7 @@ export const chat = action({
 
     let assistantResponse: string;
     try {
-      const response = await client.messages.create({
+      const response = await getAnthropicClient().messages.create({
         model: "claude-sonnet-4-20250514",
         max_tokens: 2048,
         system: CHAT_SYSTEM_PROMPT,
