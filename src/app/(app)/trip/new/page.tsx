@@ -75,7 +75,7 @@ function WizardProgress({
 
 // ─── Wizard page ──────────────────────────────────────────────────────────────
 export default function NewTripPage() {
-  const currentUser = useQuery(api.users.getCurrentUser);
+  const currentUser = useQuery(api.users.getCurrentUser, {});
 
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");

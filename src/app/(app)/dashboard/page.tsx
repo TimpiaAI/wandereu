@@ -46,7 +46,7 @@ function daysUntil(dateStr: string): number {
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const trips = useQuery(api.trips.listByUser) as Trip[] | undefined;
+  const trips = useQuery(api.trips.listByUser, {}) as Trip[] | undefined;
 
   const firstName = user?.firstName ?? user?.fullName?.split(" ")[0] ?? "Traveler";
   const greeting = getGreeting();

@@ -223,7 +223,7 @@ function DeleteAccountDialog({
 
 export default function ProfilePage() {
   const { user: clerkUser, isLoaded } = useUser();
-  const convexUser = useQuery(api.users.getCurrentUser);
+  const convexUser = useQuery(api.users.getCurrentUser, {});
   const userTrips = useQuery(api.trips.listByUser, {});
   const updateUser = useMutation(api.users.updateUser);
 
